@@ -1,4 +1,4 @@
-v2.1.0-neko: KillTips(only overlay) neko edition..
+v2.1.0-neko: KillTips(only overlay) neko edition...
 
 v2.0.9:
 - Updated: deathmatch.ini file with new changes
@@ -139,7 +139,7 @@ v2.0.3:
 v2.0.2c:
 - Fixed an issue with same all not remembering it's job
 
-v2.0.2b:
+v2.0.2b: 
 - Added Pistol only mode, available through gun_menu_mode
 - Fixed issue with welcome message
 - Fixed issue with bots and weapons (hopefully)
