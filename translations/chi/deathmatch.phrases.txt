@@ -1,0 +1,415 @@
+"Phrases"
+{
+    "Guns Menu"
+    {
+        "br"    "Digite {green}guns{default} para abrir o menu de armas."
+        "chi"   "输入 {green}guns {default}设置你需要的武器."
+        "en"    "Type {green}guns{default} to open the weapons menu."
+        "es"    "Escriba {green}guns{default} para abrir el menú de armas."
+        "de"    "Schreibe {green}guns{default} um das Waffenmenü zu öffnen."
+        "fr"    "Tapez {green}guns{default} pour ouvrir le menu des armes."
+        "pl"    "Napisz {green}guns{default} aby otworzyć menu broni."
+        "ru"    "Напечатайте {green}guns{default} что бы открыть меню оружия."
+        "jp"    "チャットで{green}guns{default}をタイプすると武器メニューが開きます。"
+    }
+
+    "Guns Disabled"
+    {
+        "br"    "O menu de armas foi {red}desativado{default}."
+        "chi"   "选枪菜单被服务器关闭"
+        "en"    "The guns menu has been {red}disabled{default}."
+        "es"    "El menú de armas se ha {red}desactivado{default}."
+        "de"    "Das Waffenmenü wurde {red}deaktiviert{default}."
+        "fr"    "Le menu des armes a été {red}désactivé{default}."
+        "pl"    "Menu broni zostało {red}wyłączone{default}."
+        "ru"    "Меню оружия было {red}отключено{default}."
+        "jp"    "武器メニューが{red}無効{default}になっています。"
+    }
+    "HS Only"
+    {
+        "br"    "HS Only mode is {green}enabled{default}."
+        "chi"   "爆头模式已经{green}启用{default}"
+        "en"    "HS Only mode is {green}enabled{default}."
+        "es"    "HS Only mode is {green}enabled{default}."
+        "de"    "HS Only Modus wurde {green}aktiviert{default}."
+        "fr"    "HS Only mode is {green}enabled{default}."
+        "pl"    "HS Only mode is {green}enabled{default}."
+        "ru"    "HS Only mode is {green}enabled{default}."
+        "jp"    "ヘッドショットのみのモードが{green}有効{default}になりました。"
+    }
+    "HS Only Client"
+    {
+        "br"    "Type {green}hs{default} to enable personal HS only client mode."
+        "chi"   "输入 {green}hs{default} 来启用本地爆头模式"
+        "en"    "Type {green}hs{default} to enable personal HS only client mode."
+        "es"    "Type {green}hs{default} to enable personal HS only client mode."
+        "de"    "Schreibe {green}hs{default} um den persönlichen HS Modus zu aktivieren."
+        "fr"    "Type {green}hs{default} to enable personal HS only client mode."
+        "pl"    "Type {green}hs{default} to enable personal HS only client mode."
+        "ru"    "Type {green}hs{default} to enable personal HS only client mode."
+        "jp"    "チャットで{green}hs{default}をタイプするとあなたのみヘッドショットのみのモードになります。"
+    }
+    "HS Only Client Disabled"
+    {
+        "br"    "HS Only Client mode has been {red}disabled{default}."
+        "chi"   "本地爆头模式已被{red}关闭{default}"
+        "en"    "HS Only Client mode has been {red}disabled{default}."
+        "es"    "HS Only Client mode has been {red}disabled{default}."
+        "de"    "HS Only Client Modus wurde {red}deaktiviert{default}."
+        "fr"    "HS Only Client mode has been {red}disabled{default}."
+        "pl"    "HS Only Client mode has been {red}disabled{default}."
+        "ru"    "HS Only Client mode has been {red}disabled{default}."
+        "jp"    "あなただけヘッドショットのみのモードが{red}無効{default}になりました。"
+    }
+    
+    "HS Only Client Enabled"
+    {
+        "br"    "HS Only Client mode has been {green}enabled{default}."
+        "chi"   "本地爆头模式已被{red}开启{default}"
+        "en"    "HS Only Client mode has been {green}enabled{default}."
+        "es"    "HS Only Client mode has been {green}enabled{default}."
+        "de"    "HS Only Client Modus wurde {green}aktiviert{default}."
+        "fr"    "HS Only Client mode has been {green}enabled{default}."
+        "pl"    "HS Only Client mode has been {green}enabled{default}."
+        "ru"    "HS Only Client mode has been {green}enabled{default}."
+        "jp"    "あなただけヘッドショットのみのモードが{green}有効{default}になりました。"
+    }
+
+    "Guns New Spawn"
+    {
+        "br"    "Voce recebera a {green}nova{default} arma no próximo spawn."
+        "chi"   "你将得到 {green}新的 {default}武器 当你下次重生."
+        "en"    "You will be given {green}new{default} weapons on next spawn."
+        "es"    "Se le dará {green}nuevas{default} armas en el próximo desove."
+        "de"    "Beim nächsten Spawn erhältst du {grün}neue{default} Waffen."
+        "fr"    "Vous recevrez de {green}nouvelles{default} armes sur le prochain spawn."
+        "pl"    "Zostaną dodane {green}nowe{default} bronie po respawnie."
+        "ru"    "Вы получите {green}новое{default} оружие в следующем возрождении."
+        "jp"    "次のスポーン時に{green}新しい武器{default}が手に入ります。"
+    }
+
+    "Guns Same Spawn"
+    {
+        "br"    "Você recebera as {green}mesmas{default} armas nos próximos spawns"
+        "chi"   "你将得到{green} 上次的 {default}武器 当你下次重生."
+        "en"    "You will be given {green}same{default} weapons on next spawn."
+        "es"    "Se le dará {green}mismas{default} armas en el próximo desove."
+        "de"    "Beim nächsten Spawn erhältst du die {grün}gleichen{default} Waffen."
+        "fr"    "Vous recevrez {green}mêmes{default} armes sur le prochain spawn."
+        "pl"    "Zostaną dodane {green}te same{default} bronie po respawnie."
+        "ru"    "Вы получите {green}аналогичное{default} оружие в следующем возрождении."
+        "jp"    "次のスポーン時から{green}同じ武器{default}が手に入るようになります。"
+    }
+
+    "Guns Random Spawn"
+    {
+        "br"    "Você recebera armas {green}aleatórias{default} nos próximos spawns"
+        "chi"   "你将得到{green} 随机 {default}武器 当你下次重生."
+        "en"    "You will be given {green}random{default} weapons on next spawn."
+        "es"    "Se le dará armas {green}al azar{default} en el próximo desove."
+        "de"    "Beim nächsten Spawn erhältst du {grün}zufällige{default} Waffen."
+        "fr"    "Vous recevrez armes {green}aléatoires{default} sur le prochain spawn."
+        "pl"    "Zostaną dodane {green}losowe{default} bronie po respawnie."
+        "ru"    "Вы получите {green}случайное{default} оружие в следующем возрождении."
+        "jp"    "次のスポーン時から{green}ランダムで{default}武器が手に入ります。"
+    }
+
+    "Panel Health Remaining"
+    {
+        "br"    "Vida Restante:"
+        "chi"   "生命值剩余:"
+        "en"    "Health Remaining:"
+        "es"    "Salud restante:"
+        "de"    "Verbleibende Gesundheit:"
+        "fr"    "Restant Santé:"
+        "pl"    "Pozostałe zdrowie:"
+        "ru"    "Оставшееся здоровье:"
+        "jp"    "残りの体力:"
+    }
+
+    "Panel Damage Giver"
+    {
+        "br"    "Você fez"
+        "chi"   "你已经死亡"
+        "en"    "You did"
+        "es"    "Lo hiciste"
+        "de"    "Du hast es geschafft"
+        "fr"    "Vous avez"
+        "pl"    "Zadałeś"
+        "ru"    "Вы совершили"
+        "jp"    "あなたがキルしました。"
+    }
+
+    "Panel Damage Taker"
+    {
+        "br"    "danos ao"
+        "chi"   "造成伤害给予"
+        "en"    "damage to"
+        "es"    "daño a"
+        "de"    "schaden"
+        "fr"    "dommages à"
+        "pl"    "obrażeń graczowi"
+        "ru"    "урон по"
+        "jp"    "与えたダメージ"
+    }
+
+    "Panel Kill Confirmed"
+    {
+        "br"    "Você matou."
+        "chi"   "你击杀了ta."
+        "en"    "You killed him."
+        "es"    "Usted lo mató."
+        "de"    "Du hast ihn getötet."
+        "fr"    "Vous l'avez tué."
+        "pl"    "Zabiłeś go."
+        "ru"    "Вы убили его."
+        "jp"    "あなたは今の敵をキルしました。"
+    }
+
+    "HP Knife Kill"
+    {
+        "br"    "Por matar um inimigo com a ({green}faca{default})."
+        "chi"   "使用 ({green}刀{default})击杀1个敌人.{red}HP+{1}{default} {pink}护甲+{2}{default}"
+        "en"    "for killing an enemy ({green}knife{default})."
+        "es"    "por matar a un enemigo ({green}cuchillo{default})."
+        "de"    "für das Töten eines Gegners mit dem ({green}Messer{default})."
+        "fr"    "pour avoir frag ({green}couteau{default})."
+        "pl"    "za zabicie przeciwnika ({green}nożem{default})."
+        "ru"    "за убийство противника ({green}ножом{default})."
+        "jp"    "敵を{green}ナイフ{default}でキルした。"
+    }
+
+    "HP Headshot Kill"
+    {
+        "br"    "Por matar um inimigo de ({green}headshot{default})."
+        "chi"   "({green}爆头{default})击杀1个敌人.{red}HP+{1}{default} {pink}护甲+{2}{default}"
+        "en"    "for killing an enemy ({green}headshot{default})."
+        "es"    "por matar a un enemigo ({green}disparo a la cabeza{default})."
+        "de"    "für das Töten eines Gegners mit einem ({green}Kopfschuss{default})."
+        "fr"    "pour avoir frag ({green}à la tête{default})."
+        "pl"    "za zabicie przeciwnika ({green}headshotem{default})."
+        "ru"    "за убийство противника ({green}в голову{default})."
+        "jp"    "敵を{green}ヘッドショット{default}でキルした。"
+    }
+
+    "HP Nade Kill"
+    {
+        "br"    "Por matar um inimigo na ({green}granada{default})."
+        "chi"   "使用 ({green}手雷{default})击杀1个敌人.{red}HP+{1}{default} {pink}护甲+{2}{default}"
+        "en"    "for killing an enemy ({green}grenade{default})."
+        "es"    "por matar a un enemigo ({green}granada{default})."
+        "de"    "für das Töten eines Gegners mit einer ({green}Granate{default})."
+        "fr"    "pour avoir frag ({green}grenade{default})."
+        "pl"    "za zabicie przeciwnika ({green}granatem{default})."
+        "ru"    "за убийство противника ({green}гранатой{default})."
+        "jp"    "敵を{green}グレネード{default}でキルした。"
+    }
+
+    "HP Kill"
+    {
+        "br"    "Por matar um inimigo."
+        "chi"   "击杀1个敌人.{red}HP+{1}{default} {pink}护甲+{2}{default}"
+        "en"    "for killing an enemy."
+        "es"    "por matar a un enemigo."
+        "de"    "für das Töten eines Gegners."
+        "fr"    "pour avoir frag."
+        "pl"    "za zabicie przeciwnika."
+        "ru"    "за убийство противника."
+        "jp"    "敵をキルした。"
+    }
+
+    "AP Knife Kill"
+    {
+        "br"    "Por matar um inimigo com a ({green}faca{default})."
+        "chi"   "使用({green}刀{default})击杀一名敌人"
+        "en"    "for killing an enemy ({green}knife{default})."
+        "es"    "por matar a un enemigo ({green}cuchillo{default})."
+        "de"    "für das Töten eines Gegners mit dem ({green}Messer{default})."
+        "fr"    "pour avoir frag ({green}couteau{default})."
+        "pl"    "za zabicie przeciwnika ({green}nożem{default})."
+        "ru"    "за убийство противника ({green}ножом{default})."
+        "jp"    "敵を{green}ナイフ{default}でキルした。"
+    }
+
+    "AP Headshot Kill"
+    {
+        "br"    "Por matar um inimigo de ({green}headshot{default})."
+        "chi"   "({green}爆头{default})击杀一名敌人"
+        "en"    "for killing an enemy ({green}headshot{default})."
+        "es"    "por matar a un enemigo ({green}disparo a la cabeza{default})."
+        "de"    "für das Töten eines Gegners mit einem ({green}Kopfschuss{default})."
+        "fr"    "pour avoir frag ({green}à la tête{default})."
+        "pl"    "za zabicie przeciwnika ({green}headshotem{default})."
+        "ru"    "за убийство противника ({green}в голову{default})."
+        "jp"    "敵を{green}ヘッドショット{default}でキルした。"
+    }
+
+    "AP Nade Kill"
+    {
+        "br"    "Por matar um inimigo na ({green}granada{default})."
+        "chi"   "使用({green}手雷{default})击杀一名敌人"
+        "en"    "for killing an enemy ({green}grenade{default})."
+        "es"    "por matar a un enemigo ({green}granada{default})."
+        "de"    "für das Töten eines Gegners mit einer ({green}Granate{default})."
+        "fr"    "pour avoir frag ({green}grenade{default})."
+        "pl"    "za zabicie przeciwnika ({green}granatem{default})."
+        "ru"    "за убийство противника ({green}гранатой{default})."
+        "jp"    "敵を{green}グレネード{default}でキルした。"
+    }
+
+    "AP Kill"
+    {
+        "br"    "Por matar um inimigo."
+        "chi"   "击杀一名敌人"
+        "en"    "for killing an enemy."
+        "es"    "por matar a un enemigo."
+        "de"    "für das Töten eines Gegners."
+        "fr"    "pour avoir frag."
+        "pl"    "za zabicie przeciwnika."
+        "ru"    "за убийство противника."
+        "jp"    "敵をキルした。"
+    }
+
+    "Spawn Editor Enabled"
+    {
+        "br"    "Edit mode {green}ativado{default}."
+        "chi"   "地图出生点编辑模式{green}开启{default}."
+        "en"    "Edit mode {green}enabled{default}."
+        "es"    "El modo de edición {green}activado{default}."
+        "de"    "Bearbeitungsmodus {grün}aktiviert{default}."
+        "fr"    "Modifier le mode {green}activé{default}."
+        "pl"    "Tryb edycji {green}włączony{default}."
+        "ru"    "Режим редактирования {green}включен{default}."
+        "jp"    "編集モードが{green}有効{default}になりました。"
+    }
+
+    "Spawn Editor Disabled"
+    {
+        "br"    "Edit mode {red}desativado{default}."
+        "chi"   "地图出生点编辑模式{green}关闭{default}."
+        "en"    "Edit mode {red}disabled{default}."
+        "es"    "El modo de edición {red}deshabilitado{default}."
+        "de"    "Bearbeitungsmodus {red}deaktiviert{default}."
+        "fr"    "Modifier le mode {red}désactivé{default}."
+        "pl"    "Tryb edycji {red}wyłączony{default}."
+        "ru"    "Режим редактирования {red}отключен{default}."
+        "jp"    "編集モードが{red}無効{default}になりました。"
+    }
+
+    "Spawn Editor Teleported"
+    {
+        "br"    "Teleportado para spawn point"
+        "chi"   "传送到出生点"
+        "en"    "Teleported to spawn point"
+        "es"    "Teletransportado a desovar puntos"
+        "de"    "Teleportiert zum Spawn"
+        "fr"    "Téléporté pour frayer le point"
+        "pl"    "Przeteleportowany do punktu respawnu"
+        "ru"    "Телепортирован к точке возрождения"
+        "jp"    "スポーン位置にテレポートしました。"
+    }
+
+    "Spawn Editor No Spawn"
+    {
+        "br"    "Não há pontos de spawn."
+        "chi"   "没有出生点."
+        "en"    "There are no spawn points."
+        "es"    "No hay puntos de regeneración."
+        "de"    "Es sind keine Spawnpunkte vorhanden."
+        "fr"    "Il n'y a pas de points de spawn."
+        "pl"    "Brak punktów respawnu."
+        "ru"    "Точек возрождения здесь нет."
+        "jp"    "そこにはスポーン位置がありません。"
+    }
+
+    "Spawn Editor Deleted Spawn"
+    {
+        "br"    "Ponto de spwan deletado."
+        "chi"   "删除出生点"
+        "en"    "Deleted spawn point"
+        "es"    "Punto de desovar eliminados"
+        "de"    "Spawnpunkt gelöscht"
+        "fr"    "Point de spawn supprimé"
+        "pl"    "Usunięto punkt respawnu"
+        "ru"    "Точка возрождения удалена"
+        "jp"    "スポーン位置を削除しました。"
+    }
+
+    "Spawn Editor Deleted All"
+    {
+        "br"    "Todos os pontos de spwan deletados."
+        "chi"   "所有出生点已经删除."
+        "en"    "All spawn points have been deleted."
+        "es"    "Se han eliminado todos los puntos de regeneración."
+        "de"    "Alle Spawnpunkte wurden gelöscht"
+        "fr"    "Tous les points spawn ont été supprimés."
+        "pl"    "Wszystkie punkty respawnu zostały usunięte."
+        "ru"    "Все точки возрождения были удалены."
+        "jp"    "全てのスポーン位置を削除しました。"
+    }
+
+    "Spawn Editor Spawn Added"
+    {
+        "br"    "Adicionado ponto de spawn"
+        "chi"   "添加出生点"
+        "en"    "Added spawn point"
+        "es"    "Punto de desovar añadido"
+        "de"    "Spawnpunkt hinzugefügt"
+        "fr"    "Point de spawn Ajouté"
+        "pl"    "Dodano punkt respawnu"
+        "ru"    "Точка возрождения добавлена"
+        "jp"    "スポーン位置を追加しました。"
+    }
+
+    "Spawn Editor Spawn Not Added"
+    {
+        "br"    "Não foi possível adicionar ponto de spawn (limite máximo alcançado)."
+        "chi"   "无法添加出生点 (达到最大限制)."
+        "en"    "Could not add spawn point (max limit reached)."
+        "es"    "No se pudo añadir punto de desovar (límite máximo alcanzado)."
+        "de"    "Es konnte kein weiterer Spawn hinzugefügt werden (Maximale Anzahl ereicht)."
+        "fr"    "Impossible d'ajouter le point spawn (limite maximale atteinte)."
+        "pl"    "Nie można dodać punktu respawnu (maksymalny limit osiągnięty)."
+        "ru"    "Не удалось добавить точки возрождения (превышен их предел)."
+        "jp"    "スポーン位置を追加することができませんでした。（上限に達したため）"
+    }
+
+    "Spawn Editor Spawn Inserted"
+    {
+        "br"    "Ponto de spawn inserido no"
+        "chi"   "插入出生点在你的位置"
+        "en"    "Inserted spawn point at"
+        "es"    "Punto de desovar Insertado en"
+        "de"    "Eingefügter Spawnpunkt bei"
+        "fr"    "Point de spawn inséré à"
+        "pl"    "Ustawiono punkt respawnu na"
+        "ru"    "Вставить точку возрождения в"
+        "jp"    "追加したスポーン位置:"
+    }
+
+    "Spawn Editor Config Saved"
+    {
+        "br"    "A configuração foi salva."
+        "chi"   "配置设置已经成功写入并储存到服务器."
+        "en"    "Configuration has been saved."
+        "es"    "La configuración se ha guardado."
+        "de"    "Konfiguration wurde gespeichert"
+        "fr"    "Configuration a été enregistrée."
+        "pl"    "Konfiguracja została zapisana."
+        "ru"    "Конфигурация была сохранена."
+        "jp"    "設定が保存されました。"
+    }
+
+    "Spawn Editor Config Not Saved"
+    {
+        "br"    "Configuração não pôde ser salva."
+        "chi"   "无法保存或写入配置.请检查目录权限或其他原因"
+        "en"    "Configuration could not be saved."
+        "es"    "La configuración no ha podido guardar."
+        "de"    "Konfiguration konnte nicht gespeichert werden."
+        "fr"    "Configuration n'a pas pu être sauvé."
+        "pl"    "Konfigurcja nie może zostać zapisana."
+        "ru"    "Конфигурация не может быть сохранена."
+        "jp"    "設定を保存することができませんでした。"
+    }
+}
