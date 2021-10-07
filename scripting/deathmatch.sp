@@ -4,15 +4,20 @@
 #include <cstrike>
 #include <csgocolors>
 #include <clientprefs>
+#include <overlays>
 
 #pragma newdecls required
 
 #define PLUGIN_VERSION          "2.1.0"
 #define PLUGIN_NAME             "[CS:GO] Deathmatch"
-#define PLUGIN_AUTHOR           "Maxximou5"
+#define PLUGIN_AUTHOR           "Maxximou5 && Neko"
 #define PLUGIN_DESCRIPTION      "Enables deathmatch style gameplay (respawning, gun selection, spawn protection, etc)."
 #define PLUGIN_URL              "https://github.com/Maxximou5/csgo-deathmatch/"
-
+#define Killone "overlays/kill/kill_1"
+#define Killtwo "overlays/kill/kill_2"
+#define Killthree "overlays/kill/kill_3"
+#define Killfour "overlays/kill/kill_4"
+#define Killfive "overlays/kill/kill_5"
 public Plugin myinfo =
 {
     name                        = PLUGIN_NAME,
@@ -67,6 +72,7 @@ Handle g_hWeapon_Secondary_Cookie;
 Handle g_hWeapon_Remember_Cookie;
 Handle g_hWeapon_First_Cookie;
 Handle g_hHSOnly_Cookie;
+Handle g_Hide_Cookie;
 
 /* Console variables */
 ConVar g_cvDM_enabled;
@@ -132,7 +138,9 @@ ConVar g_cvDM_blockweapondrops;
 
 /* Plugin Variables */
 bool g_bHSOnlyClient[MAXPLAYERS + 1];
+bool g_bHide[MAXPLAYERS+1];
 bool g_bRoundEnded = false;
+bool UseOldWpn[MAXPLAYERS+1];
 
 /* Player Color Variables */
 int g_iDefaultColor[4] = { 255, 255, 255, 255 };
@@ -187,6 +195,8 @@ int g_iDistanceSearchSuccesses = 0;
 int g_iDistanceSearchFailures = 0;
 int g_iSpawnPointSearchFailures = 0;
 
+int Kills[MAXPLAYERS+1];
+
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	RegPluginLibrary("deathmatch");
@@ -201,7 +211,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-    /* Let's not waste our time here... */
+	PrecacheDecalAnyDownload(Killone);
+	PrecacheDecalAnyDownload(Killtwo);
+	PrecacheDecalAnyDownload(Killthree);
+	PrecacheDecalAnyDownload(Killfour);
+	PrecacheDecalAnyDownload(Killfive);
+	
     if (GetEngineVersion() != Engine_CSGO)
     {
         SetFailState("ERROR: This plugin is designed only for CS:GO.");
@@ -290,7 +305,7 @@ public void OnPluginStart()
 
     /* Load DM Config */
     LoadConfig();
-
+	g_Hide_Cookie = RegClientCookie("dm_hide", "hide eff", CookieAccess_Protected);
     /* Admin Commands */
     RegAdminCmd("dm_spawn_menu", Command_SpawnMenu, ADMFLAG_CHANGEMAP, "Opens the spawn point menu.");
     RegAdminCmd("dm_respawn_all", Command_RespawnAll, ADMFLAG_CHANGEMAP, "Respawns all players.");
@@ -362,6 +377,8 @@ public void OnPluginStart()
     /* Listen For Client Commands */
     AddCommandListener(Event_Say, "say");
     AddCommandListener(Event_Say, "say_team");
+	
+	RegConsoleCmd("sm_hide", Hide);
 
     /* Hook Client Messages */
     HookUserMessage(GetUserMessageId("TextMsg"), Event_TextMsg, true);
@@ -425,11 +442,13 @@ public void OnClientCookiesCached(int client)
     char cRemember[24];
     char cFirst[24];
     char cHSOnly[24];
+	char cHide[24];
     GetClientCookie(client, g_hWeapon_Primary_Cookie, cPrimary, sizeof(cPrimary));
     GetClientCookie(client, g_hWeapon_Secondary_Cookie, cSecondary, sizeof(cSecondary));
     GetClientCookie(client, g_hWeapon_Remember_Cookie, cRemember, sizeof(cRemember));
     GetClientCookie(client, g_hWeapon_First_Cookie, cFirst, sizeof(cFirst));
     GetClientCookie(client, g_hHSOnly_Cookie, cHSOnly, sizeof(cHSOnly));
+	GetClientCookie(client, g_Hide_Cookie, cHide, sizeof(cHide));
     if (!StrEqual(cPrimary, ""))
         g_cPrimaryWeapon[client] = cPrimary;
     else g_cPrimaryWeapon[client] = "none";
@@ -445,6 +464,9 @@ public void OnClientCookiesCached(int client)
     if (!StrEqual(cHSOnly, ""))
         g_bHSOnlyClient[client] = view_as<bool>(StringToInt(cHSOnly));
     else g_bHSOnlyClient[client] = false;
+	if (!StrEqual(cHide, ""))
+        g_bHide[client] = view_as<bool>(StringToInt(cHide));
+    else g_bHide[client] = false;
 }
 
 public void OnPluginEnd()
@@ -489,6 +511,14 @@ public void OnMapStart()
             ResetClientSettings(i);
     }
     LoadMapConfig();
+	
+	for(int i = 1; i <= MaxClients; i++)
+    {
+        if(IsValidClient(i)||IsValidBotClient(i))
+        {
+			Kills[i] = 0;
+        }
+    }
     if (g_iSpawnPointCount > 0)
     {
         for (int i = 0; i < g_iSpawnPointCount; i++)
@@ -518,6 +548,8 @@ public void OnClientPutInServer(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
+	UseOldWpn[client]=false;
+	Kills[client]=0;
     if (g_cvDM_enabled.BoolValue)
         ResetClientSettings(client);
 }
@@ -533,7 +565,10 @@ bool IsValidClient(int client)
 {
     if (!(0 < client <= MaxClients)) return false;
     if (!IsClientInGame(client)) return false;
-    return true;
+	if (client < 1 || client > MaxClients) return false;
+	if (!IsClientConnected(client)) return false;
+	if (IsFakeClient(client)) return false;
+	return true;
 }
 
 void ResetClientSettings(int client)
@@ -1198,10 +1233,19 @@ bool WriteMapConfig()
     return true;
 }
 
+bool IsValidBotClient(int client)
+{
+	if ( client < 1 || client > MaxClients ) return false;
+	if ( !IsClientConnected( client )) return false;
+	if ( !IsClientInGame( client )) return false;
+	if ( !IsFakeClient(client)) return false;
+	return true;
+}
+
 public Action Event_Say(int client, const char[] command, int argc)
 {
-    static char menuTriggers[][] = { "gun", "!gun", "/gun", "guns", "!guns", "/guns", "menu", "!menu", "/menu", "weapon", "!weapon", "/weapon", "weapons", "!weapons", "/weapons" };
-    static char hsOnlyTriggers[][] = { "hs", "!hs", "/hs", "headshot", "!headshot", "/headshot" };
+    static char menuTriggers[][] = { "gun", "!gun", "/gun", "guns", "!guns", "/guns" };
+    static char hsOnlyTriggers[][] = { "hs", "!hs", "/hs" };
 
     if (g_cvDM_enabled.BoolValue && IsValidClient(client) && (GetClientTeam(client) >= CS_TEAM_T))
     {
@@ -1218,7 +1262,7 @@ public Action Event_Say(int client, const char[] command, int argc)
                 if (g_cvDM_gun_menu_mode.IntValue == 1 || g_cvDM_gun_menu_mode.IntValue == 2 || g_cvDM_gun_menu_mode.IntValue == 3)
                     DisplayOptionsMenu(client);
                 else
-                    CPrintToChat(client, "[\x04DM\x01] %t", "Guns Disabled");
+                    CPrintToChat(client, "[\x04我为C狂\x01] %t", "Guns Disabled");
                 return Plugin_Handled;
             }
         }
@@ -1235,7 +1279,7 @@ public Action Event_Say(int client, const char[] command, int argc)
                     cEnable = g_bHSOnlyClient[client] ? "Enabled" : "Disabled";
                     cHSOnly =  g_bHSOnlyClient[client] ? "1" : "0";
                     Format(buffer, sizeof(buffer), "HS Only Client %s", cEnable);
-                    CPrintToChat(client, "[\x04DM\x01]  %t", buffer);
+                    CPrintToChat(client, "[\x04我为C狂\x01]  %t", buffer);
                     SetClientCookie(client, g_hHSOnly_Cookie, cHSOnly);
                     return Plugin_Handled;
                 }
@@ -1308,10 +1352,10 @@ void DisplayOptionsMenu(int client)
 {
     int allowSameWeapons = (g_bRememberChoice[client]) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
     Menu menu = new Menu(MenuHandler);
-    menu.SetTitle("Weapon Menu:");
-    menu.AddItem("New", "New weapons");
-    menu.AddItem("Same", "Same weapons", allowSameWeapons);
-    menu.AddItem("Random", "Random weapons");
+    menu.SetTitle("【武器菜单】:");
+    menu.AddItem("New", "新的武器");
+    menu.AddItem("Same", "相同武器", allowSameWeapons);
+    menu.AddItem("Random", "随机武器");
     menu.ExitBackButton = false;
     menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -1330,6 +1374,15 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
         if (g_cvDM_enabled.BoolValue && g_cvDM_respawning.BoolValue)
             CreateTimer(g_cvDM_respawn_time.FloatValue, Timer_Respawn, GetClientSerial(client));
     }
+}
+
+public Action Hide(int client, int args)
+{
+	char cHide[16];
+	g_bHide[client]=!g_bHide[client];
+	ReplyToCommand(client,g_bHide[client]?"[\x04我为C狂\x01]击杀特效\x04关闭":"[\x04我为C狂\x01]击杀特效\x04开启");
+	cHide =  g_bHide[client] ? "1" : "0";
+	SetClientCookie(client, g_Hide_Cookie,cHide);
 }
 
 public Action Event_RoundPrestart(Event event, const char[] name, bool dontBroadcast)
@@ -1365,9 +1418,11 @@ public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast
             {
                 if (g_cvDM_welcomemsg.BoolValue && !g_bInfoMessage[client])
                 {
-                    PrintHintText(client, "This server is running:\n <font color='#00FF00'>Deathmatch</font> v%s", PLUGIN_VERSION);
-                    CPrintToChat(client, "[\x04DM\x01] This server is running \x04Deathmatch \x01v%s", PLUGIN_VERSION);
-                }
+                    PrintHintText(client, "服务器运行:\n <font color='#00FF00'>DeathMatch死斗模式</font> 版本%s\n>>插件源码来自-Neko社区服<<", PLUGIN_VERSION);
+                    CPrintToChat(client, "[\x04我为C狂\x01] 服务器运行 \x04DeathMatch \x01（版本%s）", PLUGIN_VERSION);
+					CPrintToChat(client, "[\x04我为C狂\x01] 全局FFA死斗模式[\x04开启\x01]");
+					CPrintToChat(client, "[\x04我为C狂\x01] 插件源码[\x04Neko社区服\x01]");
+				}
                 /* Hide radar. */
                 if (g_cvDM_free_for_all.BoolValue || g_cvDM_hide_radar.BoolValue)
                 {
@@ -1377,13 +1432,13 @@ public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast
                 if (!g_bInfoMessage[client])
                 {
                     if (g_cvDM_headshot_only.BoolValue)
-                        CPrintToChat(client, "[\x04DM\x01] %t", "HS Only");
+                        CPrintToChat(client, "[\x04我为C狂\x01] %t", "HS Only");
 
                     if (g_cvDM_headshot_only_allow_client.BoolValue)
-                        CPrintToChat(client, "[\x04DM\x01] %t", "HS Only Client");
+                        CPrintToChat(client, "[\x04我为C狂\x01] %t", "HS Only Client");
 
                     if (g_cvDM_gun_menu_mode.IntValue <= 3)
-                        CPrintToChat(client, "[\x04DM\x01] %t", "Guns Menu");
+                        CPrintToChat(client, "[\x04我为C狂\x01] %t", "Guns Menu");
 
                     g_bInfoMessage[client] = true;
                 }
@@ -1456,7 +1511,8 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
     {
         int victim = GetClientOfUserId(event.GetInt("userid"));
         int attacker = GetClientOfUserId(event.GetInt("attacker"));
-
+		Kills[attacker]++;
+		Kills[victim]=0;
         char weapon[32];
         event.GetString("weapon", weapon, sizeof(weapon));
 
@@ -1506,13 +1562,13 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
                     if (attackerHP < g_cvDM_hp_max.IntValue)
                     {
                         if (knifed)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_knife.IntValue, "HP Knife Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_knife.IntValue, "HP Knife Kill");
                         else if (headshot)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_headshot.IntValue, "HP Headshot Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_headshot.IntValue, "HP Headshot Kill");
                         else if (naded || decoy || inferno)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_nade.IntValue, "HP Nade Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_nade.IntValue, "HP Nade Kill");
                         else 
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_kill.IntValue, "HP Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_kill.IntValue, "HP Kill");
                     }
                 }
             }
@@ -1548,13 +1604,13 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
                     if (attackerAP < g_cvDM_ap_max.IntValue)
                     {
                         if (knifed)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_knife.IntValue, "AP Knife Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_knife.IntValue, "AP Knife Kill");
                         else if (headshot)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_headshot.IntValue, "AP Headshot Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_headshot.IntValue, "AP Headshot Kill");
                         else if (naded || decoy || inferno)
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_nade.IntValue, "AP Nade Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_nade.IntValue, "AP Nade Kill");
                         else
-                            CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_kill.IntValue, "AP Kill");
+                            CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_kill.IntValue, "AP Kill");
                     }
                 }
             }
@@ -1568,39 +1624,39 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
                 if (attackerAP < g_cvDM_ap_max.IntValue && attackerHP < g_cvDM_hp_max.IntValue)
                 {
                     if (knifed)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_knife.IntValue, g_cvDM_ap_knife.IntValue, "HP Knife Kill", "AP Knife Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_knife.IntValue, g_cvDM_ap_knife.IntValue, "HP Knife Kill", "AP Knife Kill");
                     else if (headshot)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_headshot.IntValue, g_cvDM_ap_headshot.IntValue, "HP Headshot Kill", "AP Headshot Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_headshot.IntValue, g_cvDM_ap_headshot.IntValue, "HP Headshot Kill", "AP Headshot Kill");
                     else if (naded || decoy || inferno)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_nade.IntValue, g_cvDM_ap_nade.IntValue, "HP Nade Kill", "AP Nade Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_nade.IntValue, g_cvDM_ap_nade.IntValue, "HP Nade Kill", "AP Nade Kill");
                     else
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_kill.IntValue, g_cvDM_ap_kill.IntValue, "HP Kill", "AP Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 & \x04+%i AP\x01 %t", g_cvDM_hp_kill.IntValue, g_cvDM_ap_kill.IntValue, "HP Kill", "AP Kill");
 
                     bchanged = false;
                 }
                 else if (bchanged && attackerHP < g_cvDM_hp_max.IntValue)
                 {
                     if (knifed)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_knife.IntValue, "HP Knife Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_knife.IntValue, "HP Knife Kill");
                     else if (headshot)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_headshot.IntValue, "HP Headshot Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_headshot.IntValue, "HP Headshot Kill");
                     else if (naded || decoy || inferno)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_nade.IntValue, "HP Nade Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_nade.IntValue, "HP Nade Kill");
                     else 
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i HP\x01 %t", g_cvDM_hp_kill.IntValue, "HP Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i HP\x01 %t", g_cvDM_hp_kill.IntValue, "HP Kill");
 
                     bchanged = false;
                 }
                 else if (bchanged && attackerAP < g_cvDM_ap_max.IntValue)
                 {
                     if (knifed)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_knife.IntValue, "AP Knife Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_knife.IntValue, "AP Knife Kill");
                     else if (headshot)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_headshot.IntValue, "AP Headshot Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_headshot.IntValue, "AP Headshot Kill");
                     else if (naded || decoy || inferno)
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_nade.IntValue, "AP Nade Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_nade.IntValue, "AP Nade Kill");
                     else
-                        CPrintToChat(attacker, "[\x04DM\x01] \x04+%i AP\x01 %t", g_cvDM_ap_kill.IntValue, "AP Kill");
+                        CPrintToChat(attacker, "[\x04我为C狂\x01] \x04+%i AP\x01 %t", g_cvDM_ap_kill.IntValue, "AP Kill");
                 }
             }
 
@@ -1629,7 +1685,8 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
                 }
             }
         }
-
+		if(!g_bHide[attacker])
+			PlaySounds(attacker);
         if (g_cvDM_respawning.BoolValue)
             CreateTimer(g_cvDM_respawn_time.FloatValue, Timer_Respawn, GetClientSerial(victim));
     }
@@ -1847,6 +1904,69 @@ public Action OnTraceAttack(int victim, int &attacker, int &inflictor, float &da
     }
 
     return Plugin_Continue;
+}
+
+public Action PlaySounds(int entity)
+{
+	
+	CreateTimer(0.0, DeleteOverlay, entity);
+	switch (Kills[entity])
+	{
+		case 1:
+		{
+			ShowOverlay(entity, Killone, 2.5);
+		}
+		
+		case 2:
+		{
+			ShowOverlay(entity, Killtwo, 2.5);
+		}
+		
+		case 3:
+		{
+			ShowOverlay(entity, Killthree, 2.5);
+		}
+		
+		case 4:
+		{
+			ShowOverlay(entity, Killfour, 2.5);
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+		case 5:
+		{
+			ShowOverlay(entity, Killfive, 2.5);
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+		case 6:
+		{
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+		case 7:
+		{
+			
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+		case 8:
+		{		
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+		case 9:
+		{
+			PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01正在大杀特杀,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+		}
+		
+	}
+	
+	if(Kills[entity]>9)
+	{
+		PrintToChatAll("[\x04我为C狂\x01] ★\x07%N\x01简直杀疯了,累计杀死 \x05%i \x01人",entity,Kills[entity]);
+	}
+	
 }
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
@@ -2207,7 +2327,7 @@ public int MenuHandler(Menu menu, MenuAction action, int param1, int param2)
             if (g_cvDM_loadout_style.IntValue <= 1)
             {
                 if (g_bWeaponsGivenThisRound[param1])
-                    CPrintToChat(param1, "[\x04DM\x01] %t", "Guns New Spawn");
+                    CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Guns New Spawn");
             }
             if (g_cvDM_gun_menu_mode.IntValue == 1 || g_cvDM_gun_menu_mode.IntValue == 2)
                 BuildDisplayWeaponMenu(param1, true);
@@ -2219,7 +2339,7 @@ public int MenuHandler(Menu menu, MenuAction action, int param1, int param2)
             if (g_cvDM_loadout_style.IntValue <= 1)
             {
                 if (g_bWeaponsGivenThisRound[param1])
-                    CPrintToChat(param1, "[\x04DM\x01] %t", "Guns Same Spawn");
+                    CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Guns Same Spawn");
             }
             if (g_cvDM_gun_menu_mode.IntValue == 1 || g_cvDM_gun_menu_mode.IntValue == 4)
                 GiveSavedWeapons(param1, true, true);
@@ -2233,7 +2353,7 @@ public int MenuHandler(Menu menu, MenuAction action, int param1, int param2)
             if (g_cvDM_loadout_style.IntValue <= 1)
             {
                 if (g_bWeaponsGivenThisRound[param1])
-                    CPrintToChat(param1, "[\x04DM\x01] %t", "Guns Random Spawn");
+                    CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Guns Random Spawn");
             }
             if (g_cvDM_gun_menu_mode.IntValue == 1 || g_cvDM_gun_menu_mode.IntValue == 4)
             {
@@ -2621,12 +2741,12 @@ public Action Command_RespawnAll(int client, int args)
     if (client == 0)
     {
         RespawnAll();
-        ReplyToCommand(client, "[DM] All players have been respawned.");
+        ReplyToCommand(client, "[我为C狂] 所有玩家已重生.");
         return Plugin_Handled;
     }
 
     RespawnAll();
-    CPrintToChat(client, "[\x04DM\x01] All players have been respawned.");
+    CPrintToChat(client, "[\x04我为C狂\x01] 所有玩家已重生.");
     return Plugin_Handled;
 }
 
@@ -2653,7 +2773,7 @@ public Action Command_SpawnMenu(int client, int args)
 {
     if (client == 0)
     {
-        ReplyToCommand(client, "[SM] %t", "Command is in-game only");
+        ReplyToCommand(client, "[我为C狂] %t", "Command is in-game only");
         return Plugin_Handled;
     }
 
@@ -2674,10 +2794,10 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
             if (g_bInEditMode)
             {
                 CreateTimer(1.0, RenderSpawnPoints, INVALID_HANDLE, TIMER_REPEAT);
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor Enabled");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor Enabled");
             }
             else
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor Disabled");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor Disabled");
         }
         else if (StrEqual(info, "Nearest"))
         {
@@ -2686,13 +2806,13 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
             {
                 TeleportEntity(param1, g_fSpawnPositions[spawnPoint], g_fSpawnAngles[spawnPoint], NULL_VECTOR);
                 g_iLastEditorSpawnPoint[param1] = spawnPoint;
-                CPrintToChat(param1, "[\x04DM\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
             }
         }
         else if (StrEqual(info, "Previous"))
         {
             if (g_iSpawnPointCount == 0)
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor No Spawn");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor No Spawn");
             else
             {
                 int spawnPoint = g_iLastEditorSpawnPoint[param1] - 1;
@@ -2701,13 +2821,13 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
 
                 TeleportEntity(param1, g_fSpawnPositions[spawnPoint], g_fSpawnAngles[spawnPoint], NULL_VECTOR);
                 g_iLastEditorSpawnPoint[param1] = spawnPoint;
-                CPrintToChat(param1, "[\x04DM\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
             }
         }
         else if (StrEqual(info, "Next"))
         {
             if (g_iSpawnPointCount == 0)
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor No Spawn");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor No Spawn");
             else
             {
                 int spawnPoint = g_iLastEditorSpawnPoint[param1] + 1;
@@ -2716,7 +2836,7 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
 
                 TeleportEntity(param1, g_fSpawnPositions[spawnPoint], g_fSpawnAngles[spawnPoint], NULL_VECTOR);
                 g_iLastEditorSpawnPoint[param1] = spawnPoint;
-                CPrintToChat(param1, "[\x04DM\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t #%i (%i total).", "Spawn Editor Teleported", spawnPoint + 1, g_iSpawnPointCount);
             }
         }
         else if (StrEqual(info, "Add"))
@@ -2733,7 +2853,7 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
             if (spawnPoint != -1)
             {
                 DeleteSpawn(spawnPoint);
-                CPrintToChat(param1, "[\x04DM\x01] %t #%i (%i total).", "Spawn Editor Deleted Spawn", spawnPoint + 1, g_iSpawnPointCount);
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t #%i (%i total).", "Spawn Editor Deleted Spawn", spawnPoint + 1, g_iSpawnPointCount);
             }
         }
         else if (StrEqual(info, "Delete All"))
@@ -2748,9 +2868,9 @@ public int MenuSpawnEditor(Menu menu, MenuAction action, int param1, int param2)
         else if (StrEqual(info, "Save"))
         {
             if (WriteMapConfig())
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor Config Saved");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor Config Saved");
             else
-                CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor Config Not Saved");
+                CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor Config Not Saved");
         }
         if (!StrEqual(info, "Delete All"))
             BuildSpawnEditorMenu(param1);
@@ -2766,7 +2886,7 @@ public int PanelConfirmDeleteAllSpawns(Menu menu, MenuAction action, int param1,
         if (param2 == 1)
         {
             g_iSpawnPointCount = 0;
-            CPrintToChat(param1, "[\x04DM\x01] %t", "Spawn Editor Deleted All");
+            CPrintToChat(param1, "[\x04我为C狂\x01] %t", "Spawn Editor Deleted All");
         }
         BuildSpawnEditorMenu(param1);
     }
@@ -2791,7 +2911,7 @@ int GetNearestSpawn(int client)
 {
     if (g_iSpawnPointCount == 0)
     {
-        CPrintToChat(client, "[\x04DM\x01] %t", "Spawn Editor No Spawn");
+        CPrintToChat(client, "[\x04我为C狂\x01] %t", "Spawn Editor No Spawn");
         return -1;
     }
 
@@ -2817,20 +2937,20 @@ void AddSpawn(int client)
 {
     if (g_iSpawnPointCount >= MAX_SPAWNS)
     {
-        CPrintToChat(client, "[\x04DM\x01] %t", "Spawn Editor Spawn Not Added");
+        CPrintToChat(client, "[\x04我为C狂\x01] %t", "Spawn Editor Spawn Not Added");
         return;
     }
     GetClientAbsOrigin(client, g_fSpawnPositions[g_iSpawnPointCount]);
     GetClientAbsAngles(client, g_fSpawnAngles[g_iSpawnPointCount]);
     g_iSpawnPointCount++;
-    CPrintToChat(client, "[\x04DM\x01] %t", "Spawn Editor Spawn Added", g_iSpawnPointCount, g_iSpawnPointCount);
+    CPrintToChat(client, "[\x04我为C狂\x01] %t", "Spawn Editor Spawn Added", g_iSpawnPointCount, g_iSpawnPointCount);
 }
 
 void InsertSpawn(int client)
 {
     if (g_iSpawnPointCount >= MAX_SPAWNS)
     {
-        CPrintToChat(client, "[\x04DM\x01] %t", "Spawn Editor Spawn Not Added");
+        CPrintToChat(client, "[\x04我为C狂\x01] %t", "Spawn Editor Spawn Not Added");
         return;
     }
 
@@ -2848,7 +2968,7 @@ void InsertSpawn(int client)
         GetClientAbsOrigin(client, g_fSpawnPositions[g_iLastEditorSpawnPoint[client]]);
         GetClientAbsAngles(client, g_fSpawnAngles[g_iLastEditorSpawnPoint[client]]);
         g_iSpawnPointCount++;
-        CPrintToChat(client, "[\x04DM\x01] %t #%i (%i total).", "Spawn Editor Spawn Inserted", g_iLastEditorSpawnPoint[client] + 1, g_iSpawnPointCount);
+        CPrintToChat(client, "[\x04我为C狂\x01] %t #%i (%i total).", "Spawn Editor Spawn Inserted", g_iLastEditorSpawnPoint[client] + 1, g_iSpawnPointCount);
     }
 }
 
@@ -3056,12 +3176,12 @@ public Action Command_ResetStats(int client, int args)
     if (client == 0)
     {
         ResetSpawnStats();
-        ReplyToCommand(client, "[DM] Spawn statistics have been reset.");
+        ReplyToCommand(client, "[我为C狂] 出生点统计已重置.");
         return Plugin_Handled;
     }
 
     ResetSpawnStats();
-    CPrintToChat(client, "[\x04DM\x01] Spawn statistics have been reset.");
+    CPrintToChat(client, "[\x04我为C狂\x01] 出生点统计已重置.");
     return Plugin_Handled;
 }
 
