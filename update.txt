@@ -4,8 +4,8 @@
 	{
 		"Version"
 		{
-			"Latest"	"2.0.9"
-			"Previous"	"2.0.8"
+			"Latest"	"2.1.0-neko"
+			"Previous"	"2.0.9"
 		}
 
 		"Notes"	"Changes in 2.0.9:"
