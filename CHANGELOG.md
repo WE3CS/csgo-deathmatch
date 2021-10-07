@@ -1,3 +1,5 @@
+v2.1.0-neko: KillTips(only overlay) neko edition..
+
 v2.0.9:
 - Updated: deathmatch.ini file with new changes
 - Updated: dm_spawn_time is now dm_spawn_protection_time
