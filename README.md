@@ -24,7 +24,7 @@
 </p>
 
 #### **[CS:GO] Deathmatch** - Enables deathmatch style gameplay (respawning, gun selection, spawn protection, etc).
-### **部分代码来自中国Neko社区大佬[Bklol](https://github.com/bklol/).**
+### **部分代码来自中国[Neko社区](https://www.nicotine.vip/)大佬[Bklol](https://github.com/bklol/).**
 ### Main Features
 
 - Weapon Menu
